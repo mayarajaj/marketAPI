@@ -1,0 +1,47 @@
+const express = require('express');
+const mongoose = require('mongoose');
+
+const app = express();
+
+// Connect to MongoDB database
+mongoose.connect('mongodb://localhost/mydb', { useNewUrlParser: true, useUnifiedTopology: true });
+
+// Define Product schema
+const productSchema = new mongoose.Schema({
+  name: String,
+  description: String,
+  price: Number
+});
+
+const Product = mongoose.model('Product', productSchema);
+
+// Define search endpoint
+app.get('/search', async (req, res) => {
+  try {
+    const searchTerm = req.query.q;
+
+    // Search products based on search term
+    const products = await Product.find({
+      $or: [
+        { name: { $regex: searchTerm, $options: 'i' } },
+        { description: { $regex: searchTerm, $options: 'i' } }
+      ]
+    });
+
+    res.json(products);
+  } catch (error) {
+    console.error(error);
+    res.status(500).send('Internal Server Error');
+  }
+});
+
+// Start server
+app.listen(3000, () => console.log('Server started on port 3000'));
+
+//end code 
+//
+In this example, we define a schema for our collection with three fields: field1, field2, and field3. We then define an endpoint for searching documents (/search), which expects a query parameter q containing the search term.
+
+In the endpoint, we use Mongoose's find() method to search for documents based on the search term. We use the $or operator to search for documents that match any of the three fields, and we use the $regex operator to perform a case-insensitive regular expression search.
+
+You can modify this code to match the structure of your own documents and add or remove fields from the search.
